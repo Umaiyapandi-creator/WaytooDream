@@ -98,10 +98,24 @@ function Page() {
       supabase
         .from("profiles")
         .select(
-  "id,full_name,email,role,approval_status,created_at"
+  "id,full_name,email,approval_status,created_at"
 )
         .order("created_at", { ascending: false }),
+       supabase
+    .from("user_roles")
+    .select("user_id,role"),
     ]);
+    const roleMap = new Map(
+  (ur ?? []).map((r) => [r.user_id, r.role])
+);
+
+const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
+  ...u,
+  role: roleMap.get(u.id) ?? "innovator",
+}));
+
+setUsers(mappedUsers);
+    
 
     if (prError) {
       console.error("Premium load error:", prError);
