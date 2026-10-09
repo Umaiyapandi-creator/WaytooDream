@@ -76,52 +76,75 @@ function Page() {
       navigate({ to: "/auth" });
     }
   }, [user, navigate]);
+  
+const load = async () => {
+  const [
+    { data: pr, error: prError },
+    { data: pj, error: pjError },
+    { data: us, error: usError },
+    { data: ur, error: urError },
+  ] = await Promise.all([
+    supabase
+      .from("premium_requests")
+      .select("*")
+      .order("created_at", { ascending: false }),
 
-  const load = async () => {
-    const [
-      { data: pr, error: prError },
-      { data: pj, error: pjError },
-      { data: us, error: usError },
-    ] = await Promise.all([
-      supabase
-        .from("premium_requests")
-        .select("*")
-        .order("created_at", { ascending: false }),
+    supabase
+      .from("projects")
+      .select(
+        "id,name,owner_id,industry,status,created_at,public_summary"
+      )
+      .order("created_at", { ascending: false }),
 
-      supabase
-        .from("projects")
-        .select(
-          "id,name,owner_id,industry,status,created_at,public_summary"
-        )
-        .order("created_at", { ascending: false }),
+    supabase
+      .from("profiles")
+      .select(
+        "id,full_name,email,approval_status,created_at"
+      )
+      .order("created_at", { ascending: false }),
 
-      supabase
-        .from("profiles")
-        .select(
-  "id,full_name,email,approval_status,created_at"
-)
-        .order("created_at", { ascending: false }),
-  supabase
-    .from("user_roles")
-    .select("user_id,role"),
-    ]);
-   const roleMap = new Map(
+    supabase
+      .from("user_roles")
+      .select("user_id,role"),
+  ]);
+
+  if (prError) {
+    console.error("Premium load error:", prError);
+  }
+
+  if (pjError) {
+    console.error("Project load error:", pjError);
+  }
+
+  if (usError) {
+    console.error("Users load error:", usError);
+    toast.error("Unable to load users");
+  }
+
+  if (urError) {
+    console.error("Role load error:", urError);
+    toast.error("Unable to load user roles");
+  }
+
+  setPreqs((pr as PReq[]) ?? []);
+  setProjects((pj as Proj[]) ?? []);
+
+  if (usError || urError) {
+    setUsers([]);
+    return;
+  }
+
+  const roleMap = new Map<string, string>(
     (ur ?? []).map((r) => [r.user_id, r.role])
   );
 
   const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
     ...u,
-    role: roleMap.get(u.id) ?? "innovator",
+    role: roleMap.get(u.id) ?? "Not assigned",
   }));
 
   setUsers(mappedUsers);
-
-  // other existing set functions
-  setProjects(pj ?? []);
-  setPremiumRequests(pr ?? []);
 };
-
-setUsers(mappedUsers);
     
 
     if (prError) {
