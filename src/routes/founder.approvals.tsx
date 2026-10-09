@@ -101,18 +101,25 @@ function Page() {
   "id,full_name,email,approval_status,created_at"
 )
         .order("created_at", { ascending: false }),
-       supabase
+  supabase
     .from("user_roles")
     .select("user_id,role"),
     ]);
-    const roleMap = new Map(
-  (ur ?? []).map((r) => [r.user_id, r.role])
-);
+   const roleMap = new Map(
+    (ur ?? []).map((r) => [r.user_id, r.role])
+  );
 
-const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
-  ...u,
-  role: roleMap.get(u.id) ?? "innovator",
-}));
+  const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
+    ...u,
+    role: roleMap.get(u.id) ?? "innovator",
+  }));
+
+  setUsers(mappedUsers);
+
+  // other existing set functions
+  setProjects(pj ?? []);
+  setPremiumRequests(pr ?? []);
+};
 
 setUsers(mappedUsers);
     
