@@ -84,17 +84,8 @@ const load = async () => {
     { data: us, error: usError },
     { data: ur, error: urError },
   ] = await Promise.all([
-    supabase
-      .from("premium_requests")
-      .select("*")
-      .order("created_at", { ascending: false }),
 
-    supabase
-      .from("projects")
-      .select(
-        "id,name,owner_id,industry,status,created_at,public_summary"
-      )
-      .order("created_at", { ascending: false }),
+    
 
     supabase
       .from("profiles")
