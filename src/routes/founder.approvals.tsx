@@ -77,44 +77,34 @@ function Page() {
     }
   }, [user, navigate]);
   
+
 const load = async () => {
   const [
-    { data: pr, error: prError },
-    { data: pj, error: pjError },
     { data: us, error: usError },
     { data: ur, error: urError },
+    { data: pj, error: pjError },
+    { data: pr, error: prError },
   ] = await Promise.all([
-
     supabase
-      .from("premium_requests")
+      .from("profiles")
       .select("*")
       .order("created_at", { ascending: false }),
+
+    supabase.from("user_roles").select("user_id, role"),
+
     supabase
-      .from("projects")
+      .from("data")
       .select(
         "id,name,owner_id,industry,status,created_at,public_summary"
       )
       .order("created_at", { ascending: false }),
 
+    // Keep this query only after the table exists.
     supabase
-      .from("profiles")
-      .select(
-        "id,full_name,email,approval_status,created_at"
-      )
+      .from("premium_requests")
+      .select("*")
       .order("created_at", { ascending: false }),
-
-    supabase
-      .from("user_roles")
-      .select("user_id,role"),
   ]);
-
-  if (prError) {
-    console.error("Premium load error:", prError);
-  }
-
-  if (pjError) {
-    console.error("Project load error:", pjError);
-  }
 
   if (usError) {
     console.error("Users load error:", usError);
@@ -126,8 +116,16 @@ const load = async () => {
     toast.error("Unable to load user roles");
   }
 
-  setPreqs((pr as PReq[]) ?? []);
+  if (pjError) {
+    console.error("Projects load error:", pjError);
+  }
+
+  if (prError) {
+    console.error("Premium requests load error:", prError);
+  }
+
   setProjects((pj as Proj[]) ?? []);
+  setPreqs((pr as PReq[]) ?? []);
 
   if (usError || urError) {
     setUsers([]);
@@ -135,16 +133,24 @@ const load = async () => {
   }
 
   const roleMap = new Map<string, string>(
-    (ur ?? []).map((r) => [r.user_id, r.role])
+    (ur ?? []).map((r) => [
+      String(r.user_id).trim().toLowerCase(),
+      r.role,
+    ])
   );
 
   const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
     ...u,
-    role: roleMap.get(u.id) ?? "Not assigned",
+    email: u.email ?? "",
+    approval_status: u.approval_status ?? "pending",
+    role:
+      roleMap.get(String(u.id).trim().toLowerCase()) ??
+      "Not assigned",
   }));
 
   setUsers(mappedUsers);
 };
+
 
   useEffect(() => {
     if (user) {
@@ -250,8 +256,10 @@ const load = async () => {
       }
 
       toast.success(
-        approve ? "Premium activated" : "Rejected"
-      );
+  approve
+    ? "Approved Successfully! Premium activated."
+    : "Request rejected successfully."
+);
 
       await load();
     } catch (e) {
