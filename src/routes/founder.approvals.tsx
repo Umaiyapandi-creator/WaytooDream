@@ -90,7 +90,9 @@ const load = async () => {
       .select("*")
       .order("created_at", { ascending: false }),
 
-    supabase.from("user_roles").select("user_id, role"),
+    supabase
+      .from("user_roles")
+      .select("user_id, role"),
 
     supabase
       .from("data")
@@ -99,8 +101,10 @@ const load = async () => {
       )
       .order("created_at", { ascending: false }),
 
-    // Keep this query only after the table exists.
-    
+    supabase
+      .from("premium_requests")
+      .select("*")
+      .order("created_at", { ascending: false }),
   ]);
 
   if (usError) {
@@ -129,24 +133,24 @@ const load = async () => {
     return;
   }
 
-  
-const roleMap = new Map<string, string>(
-  (ur ?? []).map((r) => [
-    String(r.user_id).trim().toLowerCase(),
-    String(r.role),
-  ])
-);
+  const roleMap = new Map<string, string>(
+    (ur ?? []).map((r) => [
+      String(r.user_id).trim().toLowerCase(),
+      String(r.role),
+    ])
+  );
 
-const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
-  ...u,
-  email: u.email ?? "",
-  approval_status: u.approval_status ?? "pending",
-  role:
-    roleMap.get(String(u.id).trim().toLowerCase()) ??
-    "Not assigned",
-}));
+  const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
+    ...u,
+    email: u.email ?? "",
+    approval_status: u.approval_status ?? "pending",
+    role:
+      roleMap.get(String(u.id).trim().toLowerCase()) ??
+      "Not assigned",
+  }));
 
-setUsers(mappedUsers);
+  setUsers(mappedUsers);
+};
 
 
 
