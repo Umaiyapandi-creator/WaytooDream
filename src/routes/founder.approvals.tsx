@@ -145,14 +145,32 @@ console.log("Roles error:", urError);
   ])
 );
 
-const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
-  ...u,
-  email: u.email ?? "",
-  approval_status: u.approval_status ?? "pending",
-  role: roleMap.get(u.id) ?? "Not assigned",
-}));
+const mappedUsers: UserProfile[] = (us ?? []).map((u) => {
+  const matchingRole = (ur ?? []).find(
+    (r) =>
+      String(r.user_id).trim().toLowerCase() ===
+      String(u.id).trim().toLowerCase()
+  );
+
+  return {
+    ...u,
+    email: u.email ?? "",
+    approval_status: u.approval_status ?? "pending",
+    role: matchingRole?.role ?? "Not assigned",
+  };
+});
+
+console.log("Mapped users:", mappedUsers);
 
 setUsers(mappedUsers);
+  console.log("User roles:", JSON.stringify(ur, null, 2));
+console.log(
+  "Profile IDs:",
+  (us ?? []).map((u) => ({
+    id: u.id,
+    email: u.email,
+  }))
+);
   };
 
 
