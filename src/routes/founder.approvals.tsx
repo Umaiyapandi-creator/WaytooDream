@@ -100,6 +100,7 @@ const load = async () => {
         "id,name,owner_id,industry,status,created_at,public_summary"
       )
       .order("created_at", { ascending: false }),
+    supabase.from("user_roles").select("user_id, role"),
 
     supabase
       .from("premium_requests")
@@ -111,6 +112,10 @@ const load = async () => {
     console.error("Users load error:", usError);
     toast.error("Unable to load users");
   }
+  console.log("Profiles:", us);
+console.log("User roles:", ur);
+console.log("Profiles error:", usError);
+console.log("Roles error:", urError);
 
   if (urError) {
     console.error("Role load error:", urError);
