@@ -133,24 +133,22 @@ const load = async () => {
     return;
   }
 
-  const roleMap = new Map<string, string>(
-    (ur ?? []).map((r) => [
-      String(r.user_id).trim().toLowerCase(),
-      String(r.role),
-    ])
-  );
+ const roleMap = new Map(
+  (ur ?? []).map((r) => [
+    r.user_id,
+    r.role,
+  ])
+);
 
-  const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
-    ...u,
-    email: u.email ?? "",
-    approval_status: u.approval_status ?? "pending",
-    role:
-      roleMap.get(String(u.id).trim().toLowerCase()) ??
-      "Not assigned",
-  }));
+const mappedUsers: UserProfile[] = (us ?? []).map((u) => ({
+  ...u,
+  email: u.email ?? "",
+  approval_status: u.approval_status ?? "pending",
+  role: roleMap.get(u.id) ?? "Not assigned",
+}));
 
-  setUsers(mappedUsers);
-};
+setUsers(mappedUsers);
+  };
 
 
 
