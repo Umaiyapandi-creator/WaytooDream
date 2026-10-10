@@ -145,25 +145,6 @@ const load = async () => {
 
   setUsers(mappedUsers);
 };
-    
-
-    if (prError) {
-      console.error("Premium load error:", prError);
-    }
-
-    if (pjError) {
-      console.error("Project load error:", pjError);
-    }
-
-    if (usError) {
-      console.error("Users load error:", usError);
-      toast.error("Unable to load users");
-    }
-
-    setPreqs((pr as PReq[]) ?? []);
-    setProjects((pj as Proj[]) ?? []);
-    setUsers((us as UserProfile[]) ?? []);
-  };
 
   useEffect(() => {
     if (user) {
